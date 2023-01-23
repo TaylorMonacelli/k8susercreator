@@ -22,8 +22,8 @@ import (
 	"gopkg.in/yaml.v2"
 
 	certificates "k8s.io/api/certificates/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"k8s.io/client-go/tools/clientcmd"
@@ -35,37 +35,37 @@ type Cluster struct {
 	Server                   string `yaml:"server"`
 }
 
-//Clusters hold an array of the clusters that would exist in the config file
+// Clusters hold an array of the clusters that would exist in the config file
 type Clusters []struct {
 	Cluster Cluster `yaml:"cluster"`
 	Name    string  `yaml:"name"`
 }
 
-//Context holds the cluster context
+// Context holds the cluster context
 type Context struct {
 	Cluster string `yaml:"cluster"`
 	User    string `yaml:"user"`
 }
 
-//Contexts holds an array of the contexts
+// Contexts holds an array of the contexts
 type Contexts []struct {
 	Context Context `yaml:"context"`
 	Name    string  `yaml:"name"`
 }
 
-//Users holds an array of the users that would exist in the config file
+// Users holds an array of the users that would exist in the config file
 type Users []struct {
 	User User   `yaml:"user"`
 	Name string `yaml:"name"`
 }
 
-//User holds the user authentication data
+// User holds the user authentication data
 type User struct {
 	ClientCertificateData string `yaml:"client-certificate-data"`
 	ClientKeyData         string `yaml:"client-key-data"`
 }
 
-//KubeConfig holds the necessary data for creating a new KubeConfig file
+// KubeConfig holds the necessary data for creating a new KubeConfig file
 type KubeConfig struct {
 	APIVersion     string   `yaml:"apiVersion"`
 	Clusters       Clusters `yaml:"clusters"`
@@ -87,11 +87,13 @@ func findKubeConfig() (string, error) {
 	}
 	return path, nil
 }
+
 func check(msg string, err error) {
 	if err != nil {
 		log.Fatal(fmt.Sprintf("%s: %s", msg, err))
 	}
 }
+
 func main() {
 	outDirPtr := flag.String("outdir", "", "[Optional] The directory to write the generated KUBECONFIG file to")
 	usernamePtr := flag.String("username", "", "[Required] The username")
@@ -202,7 +204,7 @@ func main() {
 	check("The following error occured while getting the Certificate Signing Request", err)
 	if len(csr.Status.Conditions) == 0 {
 		csr.Status.Conditions = append(csr.Status.Conditions, certificates.CertificateSigningRequestCondition{
-			Type: certificates.CertificateApproved,
+			Type:   certificates.CertificateApproved,
 			Status: corev1.ConditionTrue,
 		})
 		csr, err = clientset.CertificatesV1().CertificateSigningRequests().UpdateApproval(context.Background(), "tempcsr", csr, v1.UpdateOptions{})
@@ -217,7 +219,7 @@ func main() {
 	for len(csr.Status.Certificate) == 0 {
 		csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
 		time.Sleep(2 * time.Second)
-        }
+	}
 	clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
 	kc := &KubeConfig{
 		APIVersion: "v1",
@@ -252,7 +254,7 @@ func main() {
 		},
 	}
 	// dir, err := os.Getwd()
-	outFile := filepath.Join(*outDirPtr, strings.Replace(*usernamePtr, ":","_", -1))
+	outFile := filepath.Join(*outDirPtr, strings.Replace(*usernamePtr, ":", "_", -1))
 	check("The following error occured while getting the current working directory %s", err)
 	_, err = os.Create(outFile)
 	check("The following error occured while creating the target file %s", err)
