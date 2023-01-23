@@ -228,11 +228,13 @@ func main() {
 	if _, v := kubeConfig.Clusters[*clusterPtr]; !v {
 		log.Fatal(fmt.Sprintf("Cluster \"%s\" was not found in the current Kube Config file", *clusterPtr))
 	}
-	for len(csr.Status.Certificate) == 0 {
-		csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
+	const CSRFETCHTIMEOUT = 15 * time.Second
+	for start := time.Now(); len(csr.Status.Certificate) == 0 && time.Since(start) < CSRFETCHTIMEOUT; {
+		csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
 		time.Sleep(2 * time.Second)
 	}
 	clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
+	check(fmt.Sprintf("CSR could not be fetched before timeout %s", CSRFETCHTIMEOUT), err)
 	kc := &KubeConfig{
 		APIVersion: "v1",
 		Clusters: Clusters{
