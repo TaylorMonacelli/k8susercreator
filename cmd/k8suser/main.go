@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/base32"
 	"encoding/base64"
 	"encoding/pem"
 	"flag"
@@ -94,6 +95,15 @@ func check(msg string, err error) {
 	}
 }
 
+func getToken(length int) string {
+	randomBytes := make([]byte, 32)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		panic(err)
+	}
+	return base32.StdEncoding.EncodeToString(randomBytes)[:length]
+}
+
 func main() {
 	outDirPtr := flag.String("outdir", "", "[Optional] The directory to write the generated KUBECONFIG file to")
 	usernamePtr := flag.String("username", "", "[Required] The username")
@@ -174,9 +184,10 @@ func main() {
 	config, _ := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
+	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(getToken(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
-			Name: "tempcsr",
+			Name: csrname,
 		},
 		Spec: certificates.CertificateSigningRequestSpec{
 			Groups: []string{
@@ -200,14 +211,14 @@ func main() {
 		LastUpdateTime: v1.Now(),
 	})
 
-	csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.Background(), "tempcsr", v1.GetOptions{})
+	csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.Background(), csrname, v1.GetOptions{})
 	check("The following error occured while getting the Certificate Signing Request", err)
 	if len(csr.Status.Conditions) == 0 {
 		csr.Status.Conditions = append(csr.Status.Conditions, certificates.CertificateSigningRequestCondition{
 			Type:   certificates.CertificateApproved,
 			Status: corev1.ConditionTrue,
 		})
-		csr, err = clientset.CertificatesV1().CertificateSigningRequests().UpdateApproval(context.Background(), "tempcsr", csr, v1.UpdateOptions{})
+		csr, err = clientset.CertificatesV1().CertificateSigningRequests().UpdateApproval(context.Background(), csrname, csr, v1.UpdateOptions{})
 		check("The following error occured while approving the Certificate Signing Request", err)
 	}
 	csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
