@@ -209,7 +209,6 @@ func main() {
 		check("The following error occured while approving the Certificate Signing Request", err)
 	}
 	csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
-	clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
 	kubeConfig, err := clientcmd.LoadFromFile(kubeconfig)
 	check("The following error occured while loading the KubeConfig file", err)
 	if _, v := kubeConfig.Clusters[*clusterPtr]; !v {
@@ -219,6 +218,7 @@ func main() {
 		csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
 		time.Sleep(2 * time.Second)
         }
+	clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
 	kc := &KubeConfig{
 		APIVersion: "v1",
 		Clusters: Clusters{
