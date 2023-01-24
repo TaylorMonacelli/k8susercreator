@@ -13,7 +13,6 @@ builds:
   goarch:
   - amd64
   binary: k8suser_{{ .Os }}_{{ .Arch }}
-  id: k8suser
   no_unique_dist_dir: true
 archives:
 - format: tar.gz
