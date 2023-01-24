@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/thanhpk/randstr v1.0.4
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3

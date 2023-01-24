@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
-	"encoding/base32"
 	"encoding/base64"
 	"encoding/pem"
 	"flag"
@@ -20,6 +19,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/thanhpk/randstr"
 	"gopkg.in/yaml.v2"
 
 	certificates "k8s.io/api/certificates/v1"
@@ -94,15 +94,6 @@ func check(msg string, err error) {
 		msg = fmt.Sprintf("%s: %s", msg, err)
 		log.Fatal(msg)
 	}
-}
-
-func randString(length int) string {
-	randomBytes := make([]byte, 32)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		panic(err)
-	}
-	return base32.StdEncoding.EncodeToString(randomBytes)[:length]
 }
 
 func main() {
@@ -186,7 +177,7 @@ func main() {
 	check("The following error occured while loading the Kube Config file", err)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
-	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(randString(5)))
+	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(randstr.String(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
 			Name: csrname,
