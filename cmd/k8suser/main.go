@@ -91,11 +91,12 @@ func findKubeConfig() (string, error) {
 
 func check(msg string, err error) {
 	if err != nil {
-		log.Fatal(fmt.Sprintf("%s: %s", msg, err))
+		msg = fmt.Sprintf("%s: %s", msg, err)
+		log.Fatal(msg)
 	}
 }
 
-func getToken(length int) string {
+func randString(length int) string {
 	randomBytes := make([]byte, 32)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
@@ -185,7 +186,7 @@ func main() {
 	check("The following error occured while loading the Kube Config file", err)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
-	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(getToken(5)))
+	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(randString(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
 			Name: csrname,
@@ -226,15 +227,16 @@ func main() {
 	kubeConfig, err := clientcmd.LoadFromFile(kubeconfig)
 	check("The following error occured while loading the KubeConfig file", err)
 	if _, v := kubeConfig.Clusters[*clusterPtr]; !v {
-		log.Fatal(fmt.Sprintf("Cluster \"%s\" was not found in the current Kube Config file", *clusterPtr))
+		log.Fatalf("Cluster \"%s\" was not found in the current Kube Config file", *clusterPtr)
 	}
 	const CSRFETCHTIMEOUT = 15 * time.Second
 	for start := time.Now(); len(csr.Status.Certificate) == 0 && time.Since(start) < CSRFETCHTIMEOUT; {
 		csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
 		time.Sleep(2 * time.Second)
 	}
-	clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
-	check(fmt.Sprintf("CSR could not be fetched before timeout %s", CSRFETCHTIMEOUT), err)
+	check("CSR could not be fetched before timeout "+CSRFETCHTIMEOUT.String(), err)
+	err = clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
+	check("Failed to delete csr "+csrname, err)
 	kc := &KubeConfig{
 		APIVersion: "v1",
 		Clusters: Clusters{
