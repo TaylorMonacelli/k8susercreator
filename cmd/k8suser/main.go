@@ -229,7 +229,7 @@ func main() {
 		log.Fatalf("CSR could not be fetched before %s timeout, %s", CSRFetchTimeout, err)
 	}
 	err = clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
-	check("Failed to delete csr "+csrname, err)
+	log.Printf("Failed to delete csr %s: %s", csrname, err)
 	kc := &KubeConfig{
 		APIVersion: "v1",
 		Clusters: Clusters{
