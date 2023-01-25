@@ -6,9 +6,11 @@ set -u
 
 kubectl create namespace finance
 kubectl create deployment nginx --image nginx --namespace finance
-kubectl rollout status deployment/nginx --namespace finance
 kubectl create role myuser-finance --verb get,list --resource=deployments --namespace finance
 kubectl create rolebinding finance-rolebinding --role myuser-finance --user myuser --namespace finance
+
+# wait for deployment to be ready
+kubectl rollout status deployment/nginx --namespace finance
 
 timeout --verbose 1m \
     ./dist/k8suser_linux_amd64_v1/k8suser \
