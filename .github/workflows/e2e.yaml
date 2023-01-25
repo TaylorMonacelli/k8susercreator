@@ -4,6 +4,8 @@ name: e2e
   push:
     branches:
     - '**'
+  schedule:
+  - cron: 0 10 * * SAT
 permissions:
   contents: read
 jobs:
