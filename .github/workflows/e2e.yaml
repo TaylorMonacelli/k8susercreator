@@ -10,10 +10,6 @@ permissions:
   contents: read
 jobs:
   kind:
-    strategy:
-      matrix:
-        helm-version:
-        - v3.10.3
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -25,10 +21,6 @@ jobs:
       with:
         version: v0.17.0
         cluster_name: kind
-    - name: Setup Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: ${{ matrix.helm-version }}
     - name: Set up Go
       uses: actions/setup-go@v3
     - name: Build k8suser binary
