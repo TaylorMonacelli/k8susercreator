@@ -11,7 +11,7 @@ kubectl create role myuser-finance --verb get,list --resource=deployments --name
 kubectl create rolebinding finance-rolebinding --role myuser-finance --user myuser --namespace finance
 
 timeout --verbose 1m \
-    ./dist/k8suser_linux_amd64/k8suser \
+    ./dist/k8suser_linux_amd64_v1/k8suser \
     --orgUnit DevOps \
     --username myuser \
     --email 'myuser@gmail.com' \
