@@ -263,7 +263,7 @@ func main() {
 		},
 	}
 	// dir, err := os.Getwd()
-	outFile := filepath.Join(*outDirPtr, strings.Replace(*usernamePtr, ":", "_", -1))
+	outFile := filepath.Join(*outDirPtr, strings.ReplaceAll(*usernamePtr, ":", "_"))
 	check("The following error occured while getting the current working directory %s", err)
 	_, err = os.Create(outFile)
 	check("The following error occured while creating the target file %s", err)
