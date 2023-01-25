@@ -21,7 +21,7 @@ jobs:
       with:
         version: v0.17.0
         cluster_name: kind
-    - name: Set up Go
+    - name: Setup Go
       uses: actions/setup-go@v3
     - name: Build k8suser binary
       uses: goreleaser/goreleaser-action@v4
