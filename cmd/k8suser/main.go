@@ -177,7 +177,7 @@ func main() {
 	check("The following error occured while loading the Kube Config file", err)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
-	csrname := fmt.Sprintf("tempcsr-%s", strings.ToLower(randstr.String(5)))
+	csrname := fmt.Sprintf("%s-%s", *usernamePtr, strings.ToLower(randstr.String(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
 			Name: csrname,
@@ -228,8 +228,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("CSR could not be fetched before %s timeout, %s", CSRFetchTimeout, err)
 	}
-	err = clientset.CertificatesV1().CertificateSigningRequests().Delete(context.TODO(), csr.GetName(), v1.DeleteOptions{})
-	check("Failed to delete csr "+csrname, err)
 
 	kc := &KubeConfig{
 		APIVersion: "v1",
