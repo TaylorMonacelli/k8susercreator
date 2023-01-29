@@ -177,10 +177,10 @@ func main() {
 	check("The following error occured while loading the Kube Config file", err)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
-	csrname := fmt.Sprintf("%s-%s", *usernamePtr, strings.ToLower(randstr.String(5)))
+	csrName := fmt.Sprintf("%s-%s", *usernamePtr, strings.ToLower(randstr.String(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
-			Name: csrname,
+			Name: csrName,
 		},
 		Spec: certificates.CertificateSigningRequestSpec{
 			Groups: []string{
@@ -204,14 +204,14 @@ func main() {
 		LastUpdateTime: v1.Now(),
 	})
 
-	csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.Background(), csrname, v1.GetOptions{})
+	csr, err = clientset.CertificatesV1().CertificateSigningRequests().Get(context.Background(), csrName, v1.GetOptions{})
 	check("The following error occured while getting the Certificate Signing Request", err)
 	if len(csr.Status.Conditions) == 0 {
 		csr.Status.Conditions = append(csr.Status.Conditions, certificates.CertificateSigningRequestCondition{
 			Type:   certificates.CertificateApproved,
 			Status: corev1.ConditionTrue,
 		})
-		csr, err = clientset.CertificatesV1().CertificateSigningRequests().UpdateApproval(context.Background(), csrname, csr, v1.UpdateOptions{})
+		csr, err = clientset.CertificatesV1().CertificateSigningRequests().UpdateApproval(context.Background(), csrName, csr, v1.UpdateOptions{})
 		check("The following error occured while approving the Certificate Signing Request", err)
 	}
 	csr, _ = clientset.CertificatesV1().CertificateSigningRequests().Get(context.TODO(), csr.GetName(), v1.GetOptions{})
