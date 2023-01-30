@@ -177,7 +177,7 @@ func main() {
 	check("The following error occured while loading the Kube Config file", err)
 	clientset, err := kubernetes.NewForConfig(config)
 	check("The following error occured while loading the Kube Config file", err)
-	csrName := fmt.Sprintf("%s-%s", *usernamePtr, strings.ToLower(randstr.String(5)))
+	csrName := fmt.Sprintf("tempcsr-%s-%s", *usernamePtr, strings.ToLower(randstr.String(5)))
 	csr := &certificates.CertificateSigningRequest{
 		ObjectMeta: v1.ObjectMeta{
 			Name: csrName,
